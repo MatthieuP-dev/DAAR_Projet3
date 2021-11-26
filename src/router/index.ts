@@ -26,12 +26,4 @@ const router = createRouter({
   routes,
 })
 
-//router.beforeEach((to, _from, next) => {
- // if (to.name !== 'SignIn' && !store.state.account.address) {
-//    next({ name: 'SignIn' })
-//  } else {
-//    next()
-//  }
-//})
-
 export default router

@@ -23,6 +23,7 @@ contract BuildCollective is Ownable {
   event UserSignedUp(address indexed userAddress, User indexed user);
 
   function user(address userAddress) public view returns (User memory) {
+    
     return users[userAddress];
   }
 
@@ -64,9 +65,9 @@ event CreateCompany(string indexed companyName, User indexed owner, Company inde
 
   
 struct Project {
+  uint id;
   string projectName;
   bool registered;
-  uint256 cashprize; 
   uint256 balance;
   User[] contributor;
   Company companyOwner;
@@ -74,7 +75,7 @@ struct Project {
 }
 
 mapping(string => Project) private projects;
-mapping(address = string[]) private contributors;
+mapping(address => string[]) private contributors;
 
 event CreateProject(string indexed projectName, Project indexed projet);
 
@@ -95,7 +96,18 @@ function addContributors(string memory projectName, address newContributor) publ
     contributors[newContributor] = projects[projectName];// Same as Employee, the contributors needs to be registered
 
     return contributors[newContributor];  
-  } 
+  }
+
+    function sponsoring(uint projectId, address POAdress, uint256 amount) external payable{
+    require(users[msg.sender].registered && users[msg.sender].balance >= amount);
+    require(users[POAdress].registered);
+    for(uint k = 0; k <= projects[POAdress].length;k++){
+      if(projects[POAdress][k].id == projectId){
+        users[msg.sender].balance -= amount;
+        projects[POAdress][k].balance += amount;
+      }
+    }
+  }
 
 function createProject(string memory projectName, bool companyProject) public view returns (Project memory){
   if(projects[projectName].registered == false){
@@ -104,7 +116,6 @@ function createProject(string memory projectName, bool companyProject) public vi
 
     projects[projectName].registered = true;
     projects[projectName].balance = 0;
-    projects[projectName].cashprize = cashprizeValue;
 
     if(companyProject == true){
       projects[projectName].companyOwner = employee[msg.sender];
@@ -116,6 +127,41 @@ function createProject(string memory projectName, bool companyProject) public vi
   
   return projects[projectName];
 }
+
+  struct Bounty{
+    uint id;
+    string bountyName;
+    uint256 cashprize;
+    bool rewarded;
+  }
+
+  mapping(uint => Bounty[]) public bounties;
+
+  event BountyCreated(uint indexed founder, Bounty indexed bounty);
+
+  function bounties(uint projectId) public view returns (Bounty[] memory) {
+
+    return bounties[projectId];
+  }
+
+  function createBounty(string memory bountyName, uint256 cashprize, uint projectId) public returns(Bounty memory){
+    require(users[msg.sender].registered);
+    bountyCount++;
+    bounties[projectId].push(Bounty(bountyName, cashprize, false));
+    emit(projectId, bounties[projectId]);
+
+    return bounties[projectId][bountyCount - 1];
+  }
+
+  function bugFix(uint projectId, uint bountyId, address payable hunter) external payable{
+    for (uint k = 0; k < bounties[projectId].length; k++){
+      if (bounties[projectId][k].id == bountyId) {
+        users[hunter].balance += bounties[projectId][k].cashprize;
+        bounties[projectId][k].rewarded = true;
+        bounties[projectId][k].cashprize = 0;
+      }
+    }
+  }
 
 
 }
