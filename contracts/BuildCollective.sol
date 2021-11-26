@@ -46,22 +46,76 @@ event CreateCompany(string indexed companyName, User indexed owner, Company inde
     if(companies[companyName].registered == false){
       companies[companyName].registered = true;
       companies[companyName].name = companyName;
-      companies[companyName].owner = User.username;
+      companies[companyName].owner = users[msg.sender];
       companies[companyName].balance = 0;
     }
-    emit CreateCompany(companyName, User.username, companies[companyName]);
+    emit CreateCompany(companyName, users[msg.sender], companies[companyName]);
 
     return companies[companyName];
   }
 
  function addEmployee(string memory companyName, address newEmployee) public returns (Company memory){
-    require(users[msg.sender].registered); // If user aldready registred
-    require(users[newEmployee].registered); // If user aldready registred
-    require(companies[companyName].registered); // If company aldready registred
-    require(compareString(companies[companyName].owner.username, users[msg.sender].username)); // If user is company's owner
+    require(users[msg.sender].registered); 
+    require(users[newEmployee].registered);
+    require(companies[companyName].registered); 
+    members[newEmployee] = companies[companyName];// To add a new Employee it need to be already registered
+  } 
 
-    members[newEmployee] = companies[companyName];
+
+  
+struct Project {
+  string projectName;
+  bool registered;
+  uint256 cashprize; 
+  uint256 balance;
+  User[] contributor;
+  Company companyOwner;
+  User userOwner;
+}
+
+mapping(string => Project) private projects;
+mapping(address = string[]) private contributors;
+
+event CreateProject(string indexed projectName, Project indexed projet);
+
+function getProjects(string memory projectName) public view returns (Project memory) {
+
+  return projects[projectName];
+}
+
+function getContributors(address userAddress) public view returns (Project memory){
+
+  return contributors[userAddress];
+}
+
+function addContributors(string memory projectName, address newContributor) public returns (Project memory){
+    require(users[msg.sender].registered); 
+    require(users[newContributor].registered);
+    require(projects[projectName].registered); 
+    contributors[newContributor] = projects[projectName];// Same as Employee, the contributors needs to be registered
+
+    return contributors[newContributor];  
+  } 
+
+function createProject(string memory projectName, bool companyProject) public view returns (Project memory){
+  if(projects[projectName].registered == false){
+    require(users[msg.sender].registered);
+    require(employee[msg.sender].registered);
+
+    projects[projectName].registered = true;
+    projects[projectName].balance = 0;
+    projects[projectName].cashprize = cashprizeValue;
+
+    if(companyProject == true){
+      projects[projectName].companyOwner = employee[msg.sender];
+    } else {
+      projects[projectName].userOwner = user[msg.sender];
+    }
   }
+  emit CreateProject(projectName, projects[projectName]);
+  
+  return projects[projectName];
+}
 
 
 }
