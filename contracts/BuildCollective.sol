@@ -26,7 +26,7 @@ contract BuildCollective is Ownable {
     return users[userAddress];
   }
 
-  function signUp(string memory username) public returns (User memory) {
+  function signUp(string memory username) {
     require(bytes(username).length > 0);
     users[msg.sender] = User(username, 0, true);
     emit UserSignedUp(msg.sender, users[msg.sender]);
@@ -54,7 +54,7 @@ event CreateCompany(string indexed companyName, User indexed owner, Company inde
     return companies[companyName];
   }
 
- function addEmployee(string memory companyName, address newEmployee) public returns (Company memory){
+ function addEmployee(string memory companyName, address newEmployee) {
     require(users[msg.sender].registered); 
     require(users[newEmployee].registered);
     require(companies[companyName].registered); 
