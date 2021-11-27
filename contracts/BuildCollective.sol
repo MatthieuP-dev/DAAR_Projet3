@@ -77,7 +77,7 @@ struct Project {
 mapping(string => Project) private projects;
 mapping(address => string[]) private contributors;
 
-event CreateProject(string indexed projectName, Project indexed projet);
+event CreationProjectOK(string indexed projectName, Project indexed projet);
 
 function getProjects(string memory projectName) public view returns (Project memory) {
 
@@ -123,7 +123,7 @@ function createProject(string memory projectName, bool companyProject) public vi
       projects[projectName].userOwner = user[msg.sender];
     }
   }
-  emit CreateProject(projectName, projects[projectName]);
+  emit CreationProjectOK(projectName, projects[projectName]);
   
   return projects[projectName];
 }
@@ -137,7 +137,7 @@ function createProject(string memory projectName, bool companyProject) public vi
 
   mapping(uint => Bounty[]) public bounties;
 
-  event BountyCreated(uint indexed founder, Bounty indexed bounty);
+  event CreationBountyOK(uint indexed founder, Bounty indexed bounty);
 
   function bounties(uint projectId) public view returns (Bounty[] memory) {
 
@@ -148,7 +148,7 @@ function createProject(string memory projectName, bool companyProject) public vi
     require(users[msg.sender].registered);
     bountyCount++;
     bounties[projectId].push(Bounty(bountyName, cashprize, false));
-    emit(projectId, bounties[projectId]);
+    emit CreationBountyOK(projectId, bounties[projectId]);
 
     return bounties[projectId][bountyCount - 1];
   }
@@ -162,6 +162,5 @@ function createProject(string memory projectName, bool companyProject) public vi
       }
     }
   }
-
-
+  
 }
